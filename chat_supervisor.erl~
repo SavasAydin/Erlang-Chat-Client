@@ -1,0 +1,18 @@
+-module(chat_supervisor).
+
+-behaviour(supervisor).
+
+-define(SERVER, ?MODULE).
+
+-export([start_link/0, init/1]).
+
+start_link() ->
+  supervisor:start_link({local, ?SERVER}, ?MODULE, []).
+
+init([]) ->
+    io:format("~p init~n",[?MODULE]),
+  Message_server = {message_server, {message_server, start_link, []},
+		   permanent, 5000, worker, [message_server]},
+  DB_server =      {db_server, {db_server, start_link, []},
+		   permanent, 5000, worker, [db_server]},
+  {ok, {{one_for_all, 5, 30}, [Message_server, DB_server ]}}.

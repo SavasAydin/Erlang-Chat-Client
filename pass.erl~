@@ -1,0 +1,67 @@
+-module(pass).
+
+-import(lists, [foreach/2]).
+
+-compile(export_all).
+
+-include_lib("stdlib/include/qlc.hrl").
+
+-export([hash/1]).
+
+
+%% Authors: Ali Issa & Magnus Bergqvist
+%% Date: 2010-10-28
+
+%% Hash is our own hash function for password protection. 
+%% We wrote it just for fun.
+
+%% hash/1 is the exported function which takes a string (List of ASCII numbers)
+%% and passes it on to hash/5 together with four empty lists
+hash(Password)->
+    hash(Password,[],[],[],[]).
+
+hash([Sign|Password],[Number1|List1],[Number2|List2],[Number3|List3],Result)->
+    hash(Password,List1,List2,List3,[Sign*Number1*Number2*Number3|Result]);
+hash(Password,[],_List2,_List3,Result)->
+    hash(Password,[802950047,928800781,1139351149,427169,737351,937613,343381],_List2,_List3,Result);
+hash(Password,_List1,[],_List3,Result) ->
+    hash(Password,_List1,[547,89,191,463],_List3,Result);
+hash(Password,_List1,_List2,[],Result) ->
+    hash(Password,_List1,_List2,[83,61,3499],Result);
+ hash([],_,_,_,[H|T])-> mix(H,T).
+mix(H,[Head|Tail])->
+    mix(H*Head,Tail);
+mix(H,[]) ->H.
+
+
+   %% to register first thing to type must be a letter, then u can mix letters and integers 
+regist(User,Pass)-> 
+    Check_format = check_format(Pass),
+    LengthPass = length(Check_format),
+    Ron= do(qlc:q([{X#chat_message.username} || X <- mnesia:table(chat_message),X#chat_message.username==User])),
+    if
+       LengthPass < 4 ->
+	    your_pass_short;
+	Ron /=[] ->
+	    io:format("byt fakink username tack\n");
+	true->
+	    Userinfo = #chat_message{username=User,password=hash(Check_format)},
+	    F=fun()->
+		      mnesia:write(Userinfo) end,
+    mnesia:transaction(F)
+    end.
+
+do(Q) ->
+    F = fun() -> qlc:e(Q) end,
+    {atomic, Val} = mnesia:transaction(F),
+    Val.
+
+check_format(Char)->
+   
+     if  
+	 true == is_atom(Char)->
+	    Is_atom= atom_to_list(Char),Is_atom;
+        true == is_integer(Char) ->
+	     Is_integer = integer_to_list(Char),Is_integer	     
+	    
+end.

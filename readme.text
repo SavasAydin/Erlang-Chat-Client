@@ -1,0 +1,35 @@
+Load applicat chat and start it to use it.
+application:load(chat).
+application:start(chat).
+Or 
+chat_supervisor:start_link().
+
+Then use chat_client functions
+Ex:
+chat_client:register_name("savas", "qwerty"),
+chat_client:log_in(Username, Password),
+chat_client:log_out("savas"),
+chat_client:send_message("savas", "Hello").
+etc..
+
+The idea of chat system is intended for users to chat instantly or send message 
+to be received by user when they logged in.
+
+This system is intended to implement into funky torrent project. Unfortunatelly changes 
+in web application decisions this system is no more able to use in funky torrent project. 
+For example, especially late decision change in database that used in web application made 
+impossible to change chat system database since deadline was so close and many other 
+process was waiting to be done. Due to that change, I stoped writing code to 
+connect to server mochiweb. 
+
+Detail explaination of the system:
+First whenever chat application loaded and started, user will be able to use the 
+functionality of the system over chat_client. User needs to register once and 
+first then he/she can login to the system. As soon as he/she logged in, 
+user will receive the messages sent by other users if there is any. 
+User can send message to his/her friend instantly as long as friend 
+is online. If friend is not online then message is archieved to be received 
+when friend is online. 
+
+
+
